@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         registryCredential = 'dockerhub-credentials' // DockerHub credentials stored in Jenkins. Create a credential with your dockerhub username and password to push there.
-        GIT_REPO_URL = 'https://github.com/zbrtsn/basic-to-do-flask.git' // your github-gitlab repo url
+        GIT_REPO_URL = 'https://github.com/zbrtsn/basic-to-do-flask.git' // your github-gitlab public repo url. If your repo is private then you should create a credential for it. Check my "private-..." pipeline files
         DOCKERHUB_REPO = 'pyouck/basic_todo_flask' // your dockerhub repo for pulling and pushing.
         KUBE_CONFIG = '/home/zub/.kube/config' // Adjust the path to your kubeconfig. OR you can create a credential kind secret file and upload your .kube/config file then add here. Like:
       //KUBECONFIG = credentials('kubeconfig-file') like this.
