@@ -65,16 +65,38 @@ Here, registryCredential contains the Docker Hub account username and password u
 
 <br>
 
+```
+stage('Update Kubernetes Deployment') {
+            steps {
+                sh 'kubectl delete -f /home/zub/ProgramFiles/b_flask/k8s/kind/kind-deployment.yaml --kubeconfig=${KUBE_CONFIG}' // first deleting it for not making any mistakes. You don't have to do that.
+                sh 'kubectl apply -f /home/zub/ProgramFiles/b_flask/k8s/kind/kind-deployment.yaml --kubeconfig=${KUBE_CONFIG}'
+
+            }
+        }
+
+        stage('Run Flask Application') {
+            steps {
+                sh 'kubectl delete -f /home/zub/ProgramFiles/b_flask/k8s/kind/kind-service.yaml --kubeconfig=${KUBE_CONFIG}'
+                sh 'kubectl apply -f /home/zub/ProgramFiles/b_flask/k8s/kind/kind-service.yaml --kubeconfig=${KUBE_CONFIG}
+            }
+        }
+    }
+```
+Since my Kubernetes is installed locally, I specified the path `.kube/config` in the variables section. It applies accordingly. I remove it because sometimes there can be conflicts, and removing it resolves this issue. A check could be added here to determine whether the YAML has been applied or not.
 
 
 
 
 ## Credential
+- registryCredential = 'dockerhub-credentials' <br>
+  dockerhub-credentials is a credential created within Jenkins. It is of type "Username and password" and contains the Docker Hub account's username and password. It is passed into the pipeline using `registryCredential`.
 
 ## Related Projects
 
 Here are some related projects;
 
-[Basic Flask Project](https://github.com/zbrtsn/basic-to-do-flask.git)
+[Basic Flask Project](https://github.com/zbrtsn/basic-to-do-flask.git) <br>
+[Kubernetes-Kind](https://github.com/zbrtsn/kurbernetes-kind)
+
 
   
