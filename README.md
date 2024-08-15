@@ -82,7 +82,21 @@ stage('Update Kubernetes Deployment') {
         }
     }
 ```
-Since my Kubernetes is installed locally, I specified the path `.kube/config` in the variables section. It applies accordingly. I remove it because sometimes there can be conflicts, and removing it resolves this issue. A check could be added here to determine whether the YAML has been applied or not.
+Since my Kubernetes is installed locally, I specified the path `.kube/config` in the variables section. It applies accordingly. I remove it because sometimes there can be conflicts, and removing it resolves this issue. A check could be added here to determine whether the YAML has been applied or not. 
+
+<br>
+
+```pipeline
+stages {
+        stage('Clone Git Repository') {
+            steps {
+                git branch: 'latest', credentialsId: 'gitlab-token', url: "${GIT_REPO_URL}"
+                // you can add "gitlab-token" in Manage Jenkins --> Credentials --> Global --> Add Credentials --> Username with password and id = gitlab-token
+            }
+        }
+```
+We can access the private repository using a credential named gitlab-token, which contains the GitLab account's username and password. <br>
+The repository URL is already obtained from the variable in the environment section above. You can modify the branch part according to your needs in the code. Alternatively, instead of adjusting the branch part within the code, you can create a variable in the environment section and direct it here to simplify the process.
 
 
 
