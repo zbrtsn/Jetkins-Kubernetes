@@ -84,7 +84,9 @@ stage('Update Kubernetes Deployment') {
 ```
 Since my Kubernetes is installed locally, I specified the path `.kube/config` in the variables section. It applies accordingly. I remove it because sometimes there can be conflicts, and removing it resolves this issue. A check could be added here to determine whether the YAML has been applied or not. 
 
-<br>
+
+------------
+## If your repo is private?
 
 ```pipeline
 stages {
@@ -100,11 +102,11 @@ The repository URL is already obtained from the variable in the environment sect
 
 
 
-
+------------
 ## Credential
 - registryCredential = 'dockerhub-credentials' <br>
   dockerhub-credentials is a credential created within Jenkins. It is of type "Username and password" and contains the Docker Hub account's username and password. It is passed into the pipeline using `registryCredential`.
-
+------------
 ## Related Projects
 
 Here are some related projects;
