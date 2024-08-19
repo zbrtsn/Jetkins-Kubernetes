@@ -101,6 +101,59 @@ The repository URL is already obtained from the variable in the environment sect
 
 
 
+
+------------
+## If you wanna get your image tag name from deployment.yaml
+
+```
+stages {
+        
+        stage('Clone Git Repository') { // Git projesinin çekilme aşaması
+            steps {
+                git branch: 'latest', credentialsId: 'gitlab-login', url: "${GIT_REPO_URL}"
+            }
+        }
+        
+        stage('Get Image Tag from deployment.yaml') {
+            steps {
+                script {
+                    def yamlFile = readFile('kind-deployment.yaml') // Here read the file
+                    def tag = yamlFile.find(/image:.*:(\S+)/) { match -> match[1] } // Catch the tag name here
+                    if (tag == null) {
+                        error 'Could not find image tag in deployment.yaml'
+                    }
+                    env.IMAGE_TAG = tag
+                }
+            }
+        }
+        
+        stage('Build Docker Image') { // repo'dan çekilen projeyi build etme aşaması
+            steps {
+                script {
+                    def imageTag = "${env.IMAGE_TAG}"
+                    dockerImage = docker.build("${DOCKERHUB_REPO}:${imageTag}", "--no-cache .")
+                }
+            }
+        }
+        
+        stage('Push Docker Image to DockerHub') { // docker hub'a push
+            steps {
+                script {
+                    def imageTag = "${env.IMAGE_TAG}"
+                    docker.withRegistry('', registryCredential) {
+                        dockerImage.push("${imageTag}")
+                    }
+                }
+            }
+        }
+}
+```
+The `deployment.yaml` is inside the repository. When you clone the repository, it reads the `deployment.yaml` inside it and retrieves the tag of the image section.
+
+
+<br>
+
+
 ------------
 ## Credential
 - registryCredential = 'dockerhub-credentials' <br>
