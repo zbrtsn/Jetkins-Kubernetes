@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+
+    environment {
+        registryCredential = 'dockerhub-credentials' // docker hub'a login olmayı sağlayacak kullanıcı adı ve parolayı tutan credentials
+        GIT_REPO_URL = 'https://mtgit.mediatriple.net/zubeyir.tosun/private-basic-to-do-flask.git' // GitLab veya GitHub repo adresin
+        DOCKERHUB_REPO = 'pyouck/basic_todo_flask' // docker hub repo adresin
+    }
+
+
+stages {
+        
+        stage('Clone Git Repository') { // Git projesinin çekilme aşaması
+            steps {
+                git branch: 'latest', credentialsId: 'gitlab-login', url: "${GIT_REPO_URL}"
+            }
+        }
+        
+        stage('Get Image Tag from deployment.yaml') {
+            steps {
+                script {
+                    def yamlFile = readFile('kind-deployment.yaml') // Here read the file
+                    def tag = yamlFile.find(/image:.*:(\S+)/) { match -> match[1] } // Catch the tag name here
+                    if (tag == null) {
+                        error 'Could not find image tag in deployment.yaml'
+                    }
+                    env.IMAGE_TAG = tag
+                }
+            }
+        }
+        
+        stage('Build Docker Image') { // repo'dan çekilen projeyi build etme aşaması
+            steps {
+                script {
+                    def imageTag = "${env.IMAGE_TAG}"
+                    dockerImage = docker.build("${DOCKERHUB_REPO}:${imageTag}", "--no-cache .")
+                }
+            }
+        }
+        
+        stage('Push Docker Image to DockerHub') { // docker hub'a push
+            steps {
+                script {
+                    def imageTag = "${env.IMAGE_TAG}"
+                    docker.withRegistry('', registryCredential) {
+                        dockerImage.push("${imageTag}")
+                    }
+                }
+            }
+        }
+}
+    
+    post {
+        always {
+            cleanWs() // Jenkins çalışma alanını siler:
+        }
+    }
+}
